@@ -117,6 +117,8 @@ def check_dmsetup(auto_install = True):
             print_error("Binary was copied but still doesn't exist")
             return
 
+    if not chmod_dmsetup(): return
+
     print_progress('Checking dmsetup version... ')
     try:
         version = adb_shell('dmsetup --version')
@@ -135,17 +137,35 @@ def check_dmsetup(auto_install = True):
                     'Output was:\n' + version)
 
 
-
 def install_dmsetup():
     print_progress('Installing dmsetup binary... ')
     try:
-        pushed = subprocess.check_output(['adb', 'push', 'dmsetup', '/sbin/'], stderr=subprocess.STDOUT)
+        pushed = subprocess.check_output(
+            ['adb', 'push', 'dmsetup', '/sbin/'],
+            stderr=subprocess.STDOUT)
         print_info(pushed.strip())
         return check_dmsetup(auto_install = False)
     except subprocess.CalledProcessError as e:
         print_error('adb push reported the following error:')
         print(e.output)
         return
+
+
+def chmod_dmsetup():
+    """"
+    Makes dmsetup executable, this is necessary when the source file was not
+    executable to begin with, as on Windows systems or when the executable
+    bit got lost.
+    """
+    print_progress('Checking dmsetup permissions... ')
+    try:
+        adb_shell('[ -x /sbin/dmsetup ] || chmod +x /sbin/dmsetup')
+    except AdbShellException as e:
+        print_error('Could not make dmsetup executable, reason:\n' + str(e))
+        return
+
+    print_info('success')
+    return True
 
 
 class FstabEntry():
