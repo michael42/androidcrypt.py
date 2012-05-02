@@ -17,6 +17,7 @@ HASH_COUNT = 2000
 KEY_LEN_BYTES = 16
 IV_LEN_BYTES = 16
 
+ADB_LINE_ENDINGS = None
 FOOTER = None
 MASTER_KEY = None
 
@@ -525,13 +526,28 @@ class AdbShellException(Exception):
                .format(self.exit_code, repr(self.output));
 
 
+def adb_shell_init():
+    """
+    Print an empty string to see what adb outputs, because it varies between
+    operating systems. On Windows, the line delimiter seems to be '\r\r\n'.
+    """
+    global ADB_LINE_ENDINGS
+
+    if ADB_LINE_ENDINGS:
+        raise Exception('adb shell already initialized')
+    else:
+        ADB_LINE_ENDINGS = subprocess.check_output(['adb', 'shell', 'echo'])
+
+
 def adb_shell(cmd):
+    if not ADB_LINE_ENDINGS: adb_shell_init()
+
     cmd = '({}); RET=$?; echo; echo $RET'.format(cmd)
     raw = subprocess.check_output(['adb', 'shell', cmd])
-    lines = raw.splitlines()
+    lines = raw.split(ADB_LINE_ENDINGS)
 
-    exit_code = int(lines[-1])
-    output = '\n'.join(lines[:-2])
+    exit_code = int(lines[-2])
+    output = '\n'.join(lines[:-3])
     if exit_code == 0:
         return output
     else:
