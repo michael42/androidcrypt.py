@@ -390,7 +390,6 @@ def block_dev_get_size_in_512_bytes(block_dev):
 
     # now just use a crude hack to get around the annoying partition naming
     # (sda1 vs. mmcblk0[p]1)
-    #try:
     try:
         return long(adb_shell('cat < $(find /sys|grep {}/size)'.format(shortname)))
     except AdbShellException as e:
