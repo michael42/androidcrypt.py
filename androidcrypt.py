@@ -126,7 +126,7 @@ def check_dmcrypt_support():
 def check_dmsetup(auto_install = True):
     print_progress('Checking if dmsetup exists... ')
     try:
-        adb_shell('[ -f /sbin/dmsetup ]')
+        adb_shell('[ -f "$(which dmsetup)" ]')
         print_info('binary found')
     except:
         if auto_install:
@@ -178,7 +178,7 @@ def chmod_dmsetup():
     """
     print_progress('Checking dmsetup permissions... ')
     try:
-        adb_shell('[ -x /sbin/dmsetup ] || chmod +x /sbin/dmsetup')
+        adb_shell('[ -x "$(which dmsetup)" ] || chmod +x "$(which dmsetup)"')
     except AdbShellException as e:
         print_error('Could not make dmsetup executable, reason:\n' + str(e))
         return
