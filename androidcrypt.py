@@ -99,6 +99,7 @@ def check_dmcrypt_support():
     print_progress('Getting kernel config... ')
     try:
         config = adb_shell('zcat /proc/config.gz')
+        print_info('ok')
     except AdbShellException:
         print_info('could not load config, skipping checks')
         return True
