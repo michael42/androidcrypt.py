@@ -94,6 +94,12 @@ def check_recovery():
 
 
 def check_dmcrypt_support():
+    if not check_kernel_config(): return
+    if not check_proc_crypto(): return
+    return True
+
+
+def check_kernel_config():
     required = ['CONFIG_DM_CRYPT', 'CONFIG_CRYPTO_AES',
                 'CONFIG_CRYPTO_CBC', 'CONFIG_CRYPTO_SHA256']
     print_progress('Getting kernel config... ')
@@ -121,6 +127,28 @@ def check_dmcrypt_support():
                         "crypto features. You could try to boot an updated "
                         "version of the recovery with fastboot.")
             return
+    return True
+
+
+def check_proc_crypto():
+    print_progress('Getting /proc/crypto... ')
+    try:
+        crypto = adb_shell('grep name /proc/crypto | cut -d: -f2')
+        print_info('ok')
+    except AdbShellException as e:
+        print_error('could not get crypto support data: ' + e.output)
+        return
+
+    names = [ name.strip() for name in crypto.splitlines() ]
+    required_names = ['aes', 'cbc(aes)', 'sha256']
+    for required in required_names:
+        print_progress("Checking if '{}' is available... ".format(required))
+        if required in names:
+            print_info('ok')
+        else:
+            print_error('')
+            return
+
     return True
 
 
