@@ -115,7 +115,7 @@ def check_dmcrypt_support():
     for req in required:
         print_progress('Checking the kernel for {}... '.format(req))
         if contains_config_line(config_lines, req):
-            print_info('okay')
+            print_info('ok')
         else:
             print_error("The recovery kernel doesn't support the necessars "
                         "crypto features. You could try to boot an updated "
