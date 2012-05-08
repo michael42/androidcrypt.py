@@ -373,7 +373,7 @@ def block_dev_get_crypto_footer(block_dev):
     """
 
     shortname = os.path.basename(block_dev)
-    print_progress('Checking if {} as a crypto footer... '.format(shortname))
+    print_progress('Checking if {} has a crypto footer... '.format(shortname))
 
     size = block_dev_get_size_in_512_bytes(block_dev)
     if not size: return
