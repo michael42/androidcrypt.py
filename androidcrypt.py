@@ -218,9 +218,8 @@ def get_fstab_entries():
         return
 
     print_info('found {} partitions:'.format(len(fstab_entries)))
-    names = ['userdata', 'media']
-    encrypted = [e for e in fstab_entries if     e.block_dev_name in names]
-    ignored =   [e for e in fstab_entries if not e.block_dev_name in names]
+
+    encrypted, ignored = filter_encrypted_fstab_entries(fstab_entries)
 
     for entry in ignored:
         print('  {}, ignoring'.format(entry))
@@ -228,6 +227,17 @@ def get_fstab_entries():
         print('  {}, potentially encrypted'.format(entry))
 
     return encrypted
+
+
+def filter_encrypted_fstab_entries(fstab):
+    names = ['userdata', 'media']
+    mount_points = ['/data', '/sdcard']
+
+    interesting = [e for e in fstab
+                     if e.block_dev_name in names or e.mount_point in mount_points]
+    ignored = [e for e in fstab if not e in interesting]
+
+    return interesting, ignored
 
 
 def get_encrypted_filesystems(fstab_entries):
