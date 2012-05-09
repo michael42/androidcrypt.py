@@ -140,14 +140,25 @@ def check_proc_crypto():
         return
 
     names = [ name.strip() for name in crypto.splitlines() ]
-    required_names = ['aes', 'cbc(aes)', 'sha256']
+    required_names = ['aes', 'sha256']
     for required in required_names:
         print_progress("Checking if '{}' is available... ".format(required))
         if required in names:
             print_info('ok')
         else:
-            print_error('')
+            print_error('Required crypto mode not detected.')
             return
+
+    # It seems that /proc/crypto does not initially supply the complete list
+    # of all supported crypto modes. Directly after booting, there is no
+    # 'cbc(aes)', but after setting up the mapping with dmsetup, it is
+    # listed, despite not loading any new kernel modules.
+    print_progress("Checking if 'cbc(aes)' is available... ")
+    if 'cbc(aes)' in names:
+        print_info('ok')
+    else:
+        # try it nevertheless
+        print_info('ignoring')
 
     return True
 
